@@ -9,8 +9,9 @@ edition = "2018"
 [dependencies]
 rocket = "*"
 serde = { version = "*", features = [ "derive" ] }
+diesel = { version = "*", features = [ "postgres" ]}
 
 [dependencies.rocket_contrib]
 version = "*"
 default-features = false
-features = ["json"]
+features = [ "json", "diesel_postgres_pool" ]
