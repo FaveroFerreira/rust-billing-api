@@ -1,0 +1,16 @@
+[package]
+name = "billing-api"
+version = "0.1.0"
+authors = ["Guilherme Favero Ferreira <guifaveroferreira@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "*"
+serde = { version = "*", features = [ "derive" ] }
+
+[dependencies.rocket_contrib]
+version = "*"
+default-features = false
+features = ["json"]
