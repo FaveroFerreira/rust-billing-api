@@ -6,15 +6,25 @@ extern crate diesel;
 mod schema;
 
 use crate::schema::billing;
-use rocket::{ self, routes, get };
-use diesel::{ Queryable, Insertable };
+use bigdecimal::BigDecimal;
+use rocket::{ self, routes, get, post };
+use rocket_contrib::{ 
+    json::Json,
+    databases::{database, diesel::PgConnection}
+};
+use diesel::{ Queryable, Insertable, prelude::* };
 use serde::{ Serialize, Deserialize };
+
+
+#[database("postgres")]
+struct DbConn(PgConnection);
+
 
 #[derive(Queryable, Serialize)]
 struct Billing {
     id: i32,
     title: String,
-    amount: f32,
+    amount: BigDecimal,
     paid: bool
 }
 
@@ -22,7 +32,27 @@ struct Billing {
 #[table_name = "billing"]
 struct NewBilling {
     title: String,
-    amount: f32
+    amount: BigDecimal
+}
+
+#[post("/", data = "<new_billing>")]
+fn create_billing(connection: DbConn, new_billing: Json<NewBilling>) -> Json<Billing> {
+    let result = diesel::insert_into(billing::table)
+        .values(&new_billing.0)
+        .get_result(&*connection)
+        .unwrap();
+
+    return Json(result);
+}
+
+#[get("/")]
+fn get_billings(connection: DbConn) -> Json<Vec<Billing>> {
+    let result = billing::table
+        .order(billing::columns::id.desc())
+        .load::<Billing>(&*connection)
+        .unwrap();
+    
+    return Json(result);
 }
 
 #[get("/hello")]
@@ -37,7 +67,8 @@ fn hello_name(name: String) -> String {
 
 fn main() { 
     rocket::ignite()
+        .attach(DbConn::fairing())
         .mount("/hello", routes![hello, hello_name])
-        .mount("/billings", routes![])
+        .mount("/billings", routes![get_billings, create_billing])
         .launch();
 }

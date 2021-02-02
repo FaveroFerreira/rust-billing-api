@@ -8,8 +8,12 @@ edition = "2018"
 
 [dependencies]
 rocket = "*"
-serde = { version = "*", features = [ "derive" ] }
-diesel = { version = "*", features = [ "postgres" ]}
+serde = { version = "*", features = [ "derive", ] }
+bigdecimal = { version = "0.1.2", features = [ "serde" ] }
+
+[dependencies.diesel]
+version = "*"
+features = [ "postgres", "numeric" ]
 
 [dependencies.rocket_contrib]
 version = "*"
